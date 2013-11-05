@@ -1,0 +1,9 @@
+degen = Christian Degen <christian.degen@icfm.ch>
+sam = Samuel Berger <samuel.berger@icfm.ch>
+wiktor = Wiktor Starczewski <wiktor.starczewski@icfm.ch>
+simone = Simone Congia <simone.congia@icfm.ch>
+moll = Sharon Moll <Sharon.Moll@icfm.ch>
+sharon = Sharon Moll <Sharon.Moll@icfm.ch>
+update = Christian Degen <christian.degen@icfm.ch>
+sisic = Haris Sisic <haris.sisic@icfm.ch>
+admin = Samuel Berger <samuel.berger@icfm.ch>

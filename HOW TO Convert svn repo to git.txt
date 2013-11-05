@@ -1,0 +1,35 @@
+// install SlikSvn, open a Command Prompt as admin and move to the instal folder/bin
+// e.g. c:\Program Files\SlikSvn\bin\svnadmin.exe
+
+// create a dump file of the svn repository starting from the revision 7000
+svnrdump dump http://svicfm10.icfm.local:8080/svn/vzag/trunk -r7000:HEAD > dumpfile.dump
+
+// create local repository
+go to c:\svn and  execute : "c:\Program Files\SlikSvn\bin\svnadmin.exe" create ng
+
+//Load the dump file into the empty repository
+svnadmin load c:/svn/ng < dumpfile.dump
+
+// if needed, delete previous service
+sc delete svnserver
+
+// create service for localhost repository
+sc create svnserver binpath= "\"C:\Program Files\SlikSvn\bin\svnserve.exe\" --service -r c:\svn\ng" displayname= "Subversion" depend= Tcpip start= auto
+
+// clone the svn repository creating a git one
+// the file authors.txt contains the mapping between svn and git commit authors. 
+ git svn clone "svn://localhost/" ngGit -no-metadata -A C:\Temp\authors.txt -t tags -b branches -T trunk -r7000:HEAD
+
+ // Setup a git server on svicfm09: 
+ //install gitstack
+ http://gitstack.com/
+
+ // add the server repository to the gitstack git server. It will be possible to clone the repository using the link 
+ http://svicfm09:8081/ng
+
+ // as git client, I suggest installing GitExtensions
+ http://sourceforge.net/projects/gitextensions/
+
+
+ // official Visual studio ignore file
+ https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
