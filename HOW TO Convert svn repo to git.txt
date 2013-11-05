@@ -24,6 +24,11 @@ sc create svnserver binpath= "\"C:\Program Files\SlikSvn\bin\svnserve.exe\" --se
  //install gitstack
  http://gitstack.com/
 
+
+
+
+cccc
+
  // add the server repository to the gitstack git server. It will be possible to clone the repository using the link 
  http://svicfm09:8081/ng
 
