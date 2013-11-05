@@ -6,4 +6,5 @@ moll = Sharon Moll <Sharon.Moll@icfm.ch>
 sharon = Sharon Moll <Sharon.Moll@icfm.ch>
 update = Christian Degen <christian.degen@icfm.ch>
 sisic = Haris Sisic <haris.sisic@icfm.ch>
+test
 admin = Samuel Berger <samuel.berger@icfm.ch>
