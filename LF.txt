@@ -1,0 +1,22 @@
+
+                     "EmailAddress", "developers@icfm.ch"
+ 
+             byte[] content;
+ 
+                 attachment
+             };
+ 
+-            //Creates mail and compares it with default diff tool
+             var mail = DefaultMailHandler.SendEmail(args, objConfigMailing);
++            
++            // Verify mail with approved one
+
+
+
+
+
+
+
+
+
+
