@@ -20,4 +20,3 @@ Subject: [PATCH] Removed Package folder from ng
  .../Autofac.Extras.FakeItEasy.3.0.0.nuspec         |    21 -
  .../Autofac.Extras.Multitenant.3.1.0.nupkg         |   Bin 14521 -> 0 bytes
  .../Autofac.Extras.Multitenant.3.1.0.nuspec        |    20 -
- .../Autofac.Extras.Multitenant.3.1.1.nupkg         |   Bin 14720 -> 0 bytes
