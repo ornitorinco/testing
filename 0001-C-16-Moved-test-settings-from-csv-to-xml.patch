@@ -1,0 +1,442 @@
+From b3c85e05542bdac0b6ade5cd30f0add51d605225 Mon Sep 17 00:00:00 2001
+From: Simone Congia <simone.congia@icfm.com>
+Date: Mon, 7 Apr 2014 09:00:46 +0200
+Subject: [PATCH] #C-16 - Moved test settings from csv to xml
+
+---
+ .../Icfm.Web.Integration.Test.csproj               |   8 +-
+ tests/Icfm.Web.Integration.Test/LoginTest.cs       | 143 +++++++++------------
+ tests/Icfm.Web.Integration.Test/TestData.xml       |  76 +++++++++++
+ .../TestInsideCamposSettings.csv                   |   4 -
+ tests/Icfm.Web.Integration.Test/TestSettings.csv   |   2 -
+ 5 files changed, 139 insertions(+), 94 deletions(-)
+ create mode 100644 tests/Icfm.Web.Integration.Test/TestData.xml
+ delete mode 100644 tests/Icfm.Web.Integration.Test/TestInsideCamposSettings.csv
+ delete mode 100644 tests/Icfm.Web.Integration.Test/TestSettings.csv
+
+diff --git a/tests/Icfm.Web.Integration.Test/Icfm.Web.Integration.Test.csproj b/tests/Icfm.Web.Integration.Test/Icfm.Web.Integration.Test.csproj
+index a100bd9..ca1fef1 100644
+--- a/tests/Icfm.Web.Integration.Test/Icfm.Web.Integration.Test.csproj
++++ b/tests/Icfm.Web.Integration.Test/Icfm.Web.Integration.Test.csproj
+@@ -114,8 +114,6 @@
+   <ItemGroup>
+     <None Include="app.config" />
+     <None Include="packages.config" />
+-    <None Include="TestInsideCamposSettings.csv" />
+-    <None Include="TestSettings.csv" />
+   </ItemGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\..\src\Icfm.AuwiesenHelpdesk.web\Icfm.AuwiesenHelpdesk.Web.csproj">
+@@ -131,6 +129,9 @@
+       <Name>Icfm.Helpdesk.Web</Name>
+     </ProjectReference>
+   </ItemGroup>
++  <ItemGroup>
++    <Content Include="TestData.xml" />
++  </ItemGroup>
+   <Choose>
+     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+       <ItemGroup>
+@@ -155,8 +156,7 @@
+     <PostBuildEvent>
+ xcopy /D /Y "$(SolutionDir)packages\SpecsFor.Mvc.3.1.0\tools\IEDriverServer.exe" "$(TargetDir)"
+ xcopy /D /Y "$(SolutionDir)packages\SpecsFor.Mvc.3.1.0\tools\ChromeDriver.exe" "$(TargetDir)"
+-xcopy /D /Y "$(SolutionDir)tests\Icfm.Web.Integration.Test\TestSettings.csv" "$(TargetDir)"
+-xcopy /D /Y "$(SolutionDir)tests\Icfm.Web.Integration.Test\TestInsideCamposSettings.csv" "$(TargetDir)"</PostBuildEvent>
++xcopy /D /Y "$(SolutionDir)tests\Icfm.Web.Integration.Test\TestData.xml" "$(TargetDir)"</PostBuildEvent>
+   </PropertyGroup>
+   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+        Other similar extension points exist, see Microsoft.Common.targets.
+diff --git a/tests/Icfm.Web.Integration.Test/LoginTest.cs b/tests/Icfm.Web.Integration.Test/LoginTest.cs
+index 773f751..09d0cfd 100644
+--- a/tests/Icfm.Web.Integration.Test/LoginTest.cs
++++ b/tests/Icfm.Web.Integration.Test/LoginTest.cs
+@@ -31,12 +31,12 @@ namespace Icfm.Web.Integration.Test
+             app = new MvcWebApp();
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_SpitalMuri_Helpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_SpitalMuri_Helpdesk_ValidCredentials_LogsIn() {
+-            string url = TestContext.DataRow["spitalMuriUrl"].ToString();
+-            string username = (string) TestContext.DataRow["spitalMuriUsername"];
+-            string password = TestContext.DataRow["spitalMuriPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string) TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             SpecsFor.Mvc.MvcWebApp.BaseUrl = url;
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+@@ -51,13 +51,13 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsNotNull(field);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_Generic_Helpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_Generic_Helpdesk_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["helpdeskUrl"].ToString();
+-            string username = (string)TestContext.DataRow["helpdeskUsername"];
+-            string password = TestContext.DataRow["helpdeskPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             SpecsFor.Mvc.MvcWebApp.BaseUrl = url;
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+@@ -72,11 +72,11 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsNotNull(field);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_AuwiesenDirekt_Helpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_AuwiesenDirekt_Helpdesk_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["auwiesenDirectUrl"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
+             //act
+             app.Browser.Navigate().GoToUrl(url);
+ 
+@@ -86,14 +86,14 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsTrue("Callcenter Ticketing" == app.Browser.Title);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_Auwiesen_Helpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_Auwiesen_Helpdesk_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["auwiesenUrl"].ToString();
+-            string usernameCallcenter = (string)TestContext.DataRow["auwiesenUsernameCallcenter"];
+-            string usernameReport = (string)TestContext.DataRow["auwiesenUsernameReport"];
+-            string password = TestContext.DataRow["auwiesenPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string usernameCallcenter = (string)TestContext.DataRow["Callcenter"];
++            string usernameReport = (string)TestContext.DataRow["Report"];
++            string password = TestContext.DataRow["Password"].ToString();
+             SpecsFor.Mvc.MvcWebApp.BaseUrl = url;
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+@@ -124,12 +124,12 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsTrue("Callcenter Ticketing" == app.Browser.Title);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_EuropaAllee_Helpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_EuropaAllee_Helpdesk_ValidCredentials_LogsIn() {
+-            string url = TestContext.DataRow["europaalleeUrl"].ToString();
+-            string username = (string) TestContext.DataRow["europaalleeUsername"];
+-            string password = TestContext.DataRow["europaalleePassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string) TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             SpecsFor.Mvc.MvcWebApp.BaseUrl = url;
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+@@ -150,13 +150,13 @@ namespace Icfm.Web.Integration.Test
+             field = app.Browser.FindElement(By.Id("tree"));
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_Campos_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_Campos_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["camposUrl"].ToString();
+-            string username = (string)TestContext.DataRow["camposUsername"];
+-            string password = TestContext.DataRow["camposPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+ 
+@@ -173,22 +173,9 @@ namespace Icfm.Web.Integration.Test
+                 loginButton.Click();
+             }
+ 
+-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("projectSearchField")));
+-            IWebElement field = app.Browser.FindElement(By.Id("projectSearchField"));
+-            //assert
+-            Assert.IsNotNull(field);
+-
+-            //logout
+-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("userbox")));
+-            IWebElement userbox = app.Browser.FindElement(By.Id("userbox"));
+-            var logoutSpan = userbox.FindElement(By.ClassName("bottomright")).FindElement(By.ClassName("pointer"));
+-            if (logoutSpan != null)
+-            {
+-                logoutSpan.Click();
+-            }
+-
+-            // Delete cookies, next test will need authentication 
+-            app.Browser.Manage().Cookies.DeleteAllCookies();
++            wait.Until(ExpectedConditions.ElementExists(By.CssSelector("div.x-form-field-trigger-wrap")));
++            var clientSelectionField = app.Browser.FindElement(By.CssSelector("div.x-form-field-trigger-wrap"));
++            Assert.IsNotNull(clientSelectionField);
+         }
+ 
+         [TestMethod]
+@@ -217,17 +204,17 @@ namespace Icfm.Web.Integration.Test
+         }
+ 
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestInsideCamposSettings.csv", "TestInsideCamposSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_ProjectFromCampos_ValidCredentials_LogsIn() {
+ 
+-            string url = TestContext.DataRow["camposUrl"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
+ 
+-            string username = (string)TestContext.DataRow["camposUsername"];
+-            string password = TestContext.DataRow["camposPassword"].ToString();
+-            string projectLabel = TestContext.DataRow["projectLabel"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
++            string projectLabel = TestContext.DataRow["Label"].ToString();
+             // P, D, T, S
+-            string projectType = TestContext.DataRow["projectType"].ToString();
++            string projectType = TestContext.DataRow["Type"].ToString();
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+             
+@@ -262,23 +249,18 @@ namespace Icfm.Web.Integration.Test
+             project.Click();
+ 
+             wait.Until(ExpectedConditions.ElementExists(By.Id("ext-quicktips-tip")));
+-            // check the project is online
+-            Assert.IsTrue(app.Browser.Url.EndsWith("MapViewer.aspx"));
+ 
+             wait.Until(ExpectedConditions.ElementExists(By.CssSelector("div.x-form-field-trigger-wrap")));
+             var clientSelectionField = app.Browser.FindElement(By.CssSelector("div.x-form-field-trigger-wrap"));
+             Assert.IsNotNull(clientSelectionField);
+-
+-            // Delete cookies, next test will need authentication 
+-            app.Browser.Manage().Cookies.DeleteAllCookies();
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_EwzHelpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_EwzHelpdesk_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["ewzHelpdeskUrl"].ToString();
+-            string username = (string)TestContext.DataRow["ewzHelpdeskUsername"];
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
+             app.Browser.Navigate().GoToUrl(url+username);
+             //act
+ 
+@@ -290,13 +272,13 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsNotNull(abbreviationField);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_CamposMobile_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_CamposMobile_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["camposMobileUrl"].ToString();
+-            string username = TestContext.DataRow["camposMobileUsername"].ToString();
+-            string password = TestContext.DataRow["camposMobilePassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = TestContext.DataRow["Username"].ToString();
++            string password = TestContext.DataRow["Password"].ToString();
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+ 
+@@ -316,12 +298,12 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsNotNull(userIcon);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_CkwHelpdesk_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_CkwHelpdesk_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["ckwHelpdeskUrl"].ToString();
+-            string username = (string)TestContext.DataRow["ckwHelpdeskUsername"];
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
+             app.Browser.Navigate().GoToUrl(url + username);
+             //act
+ 
+@@ -333,13 +315,13 @@ namespace Icfm.Web.Integration.Test
+             Assert.IsNotNull(abbreviationField);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_Campos_DirectLogin_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_Campos_DirectLogin_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["camposDirectUrl"].ToString();
+-            string username = (string)TestContext.DataRow["camposDirectUsername"];
+-            string password = TestContext.DataRow["camposDirectPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+ 
+@@ -357,31 +339,18 @@ namespace Icfm.Web.Integration.Test
+                 loginButton.Click();
+             }
+ 
+-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("projectSearchField")));
+-            IWebElement field = app.Browser.FindElement(By.Id("projectSearchField"));
+-            //assert
+-            Assert.IsNotNull(field);
+-
+-            //logout
+-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("userbox")));
+-            IWebElement userbox = app.Browser.FindElement(By.Id("userbox"));
+-            var logoutSpan = userbox.FindElement(By.ClassName("bottomright")).FindElement(By.ClassName("pointer"));
+-            if (logoutSpan != null)
+-            {
+-                logoutSpan.Click();
+-            }
+-
+-            // Delete cookies, next test will need authentication 
+-            app.Browser.Manage().Cookies.DeleteAllCookies();
++            wait.Until(ExpectedConditions.ElementExists(By.CssSelector("div.x-form-field-trigger-wrap")));
++            var clientSelectionField = app.Browser.FindElement(By.CssSelector("div.x-form-field-trigger-wrap"));
++            Assert.IsNotNull(clientSelectionField);
+         }
+ 
+-        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.CSV", "TestSettings.csv", "TestSettings#csv", DataAccessMethod.Sequential)]
++        [DataSource("Microsoft.VisualStudio.TestTools.DataSource.XML", "TestData.xml", "LoginTest_Login_Pppburgdorf_ValidCredentials_LogsIn", DataAccessMethod.Sequential)]
+         [TestMethod]
+         public void Login_Pppburgdorf_ValidCredentials_LogsIn()
+         {
+-            string url = TestContext.DataRow["pppburgdorfUrl"].ToString();
+-            string username = (string)TestContext.DataRow["pppburgdorfUsername"];
+-            string password = TestContext.DataRow["pppburgdorfPassword"].ToString();
++            string url = TestContext.DataRow["Url"].ToString();
++            string username = (string)TestContext.DataRow["Username"];
++            string password = TestContext.DataRow["Password"].ToString();
+             app.Browser.Navigate().GoToUrl(url);
+             //act
+ 
+@@ -410,5 +379,11 @@ namespace Icfm.Web.Integration.Test
+                 logoutSpan.Click();
+             }
+         }
++
++        [TestCleanup]
++        public void RemoveCookies() {
++            // Delete cookies, next test will need authentication 
++            app.Browser.Manage().Cookies.DeleteAllCookies();
++        }
+     }
+ }
+diff --git a/tests/Icfm.Web.Integration.Test/TestData.xml b/tests/Icfm.Web.Integration.Test/TestData.xml
+new file mode 100644
+index 0000000..faf4cd7
+--- /dev/null
++++ b/tests/Icfm.Web.Integration.Test/TestData.xml
+@@ -0,0 +1,76 @@
++<?xml version="1.0" encoding="utf-8" ?>
++ <TestData>
++   <LoginTest_Login_SpitalMuri_Helpdesk_ValidCredentials_LogsIn>
++     <Url>http://helpdesk.campos.dev/spitalmuri/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_SpitalMuri_Helpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_Generic_Helpdesk_ValidCredentials_LogsIn>
++     <Url>http://helpdesk.campos.dev/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_Generic_Helpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_AuwiesenDirekt_Helpdesk_ValidCredentials_LogsIn>
++     <Url>http://localhost/auwiesenhelpdesk/Account/Login?Hash=796CC1B263C44393AB4DA446BE1D72C1</Url>
++   </LoginTest_Login_AuwiesenDirekt_Helpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_Auwiesen_Helpdesk_ValidCredentials_LogsIn>
++     <Url>http://localhost/auwiesenhelpdesk</Url>
++     <Report>test.rieter@icfm.ch</Report>
++     <Callcenter>callcenter@auwiesen.ch</Callcenter>
++     <Password>12345678</Password>
++   </LoginTest_Login_Auwiesen_Helpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_EuropaAllee_Helpdesk_ValidCredentials_LogsIn>
++     <Url>http://helpdesk.campos.dev/europaallee/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_EuropaAllee_Helpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_Campos_ValidCredentials_LogsIn>
++     <Url>http://localhost/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_Campos_ValidCredentials_LogsIn>
++   <LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>
++     <Url>http://localhost/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++     <Label># Kaba TZM 2</Label>
++     <Type>P</Type>
++   </LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>   
++   <LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>
++     <Url>http://localhost/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++     <Label>Auwiesen</Label>
++     <Type>P</Type>
++   </LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>   
++   <LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>
++     <Url>http://localhost/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++     <Label># Kaba TZM 2</Label>
++     <Type>D</Type>
++   </LoginTest_Login_ProjectFromCampos_ValidCredentials_LogsIn>
++   <LoginTest_Login_EwzHelpdesk_ValidCredentials_LogsIn>
++     <Url>http://ng.campos.ch/ewz/Account/Login?hash=17C03957E58ED035C6647C965B66B5FBDF0850708E534866F46D733A7ACE870ECA2380E2E4F9BE57381D&username=</Url>
++     <Username>EWZCAPP@ewz.ch</Username>
++   </LoginTest_Login_EwzHelpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_CamposMobile_ValidCredentials_LogsIn>
++     <Url>http://www.campos.ch/m/</Url>
++     <Username>apple</Username>
++     <Password>banana</Password>
++   </LoginTest_Login_CamposMobile_ValidCredentials_LogsIn>
++   <LoginTest_Login_CkwHelpdesk_ValidCredentials_LogsIn>
++     <Url>https://ng2.campos.ch/ckwhelpdesk/Account/Login?hash=71A71b5ED5E2A0E88DB1C22D1C0F84C85DF2C5D264F51917D270B889078B2403F69A00dE158FEDED59D9&username=</Url>
++     <Username>marco.huwiler@ckw.ch</Username>
++   </LoginTest_Login_CkwHelpdesk_ValidCredentials_LogsIn>
++   <LoginTest_Login_Campos_DirectLogin_ValidCredentials_LogsIn>
++     <Url>https://www.campos.ch/login/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_Campos_DirectLogin_ValidCredentials_LogsIn>
++   <LoginTest_Login_Pppburgdorf_ValidCredentials_LogsIn>
++     <Url>http://localhost/pppburgdorf/</Url>
++     <Username>sam</Username>
++     <Password>12345678</Password>
++   </LoginTest_Login_Pppburgdorf_ValidCredentials_LogsIn>
++ </TestData>
+\ No newline at end of file
+diff --git a/tests/Icfm.Web.Integration.Test/TestInsideCamposSettings.csv b/tests/Icfm.Web.Integration.Test/TestInsideCamposSettings.csv
+deleted file mode 100644
+index 01a2215..0000000
+--- a/tests/Icfm.Web.Integration.Test/TestInsideCamposSettings.csv
++++ /dev/null
+@@ -1,4 +0,0 @@
+-﻿id,camposUrl,camposUsername,camposPassword,projectLabel,projectType
+-3,http://localhost/,sam,12345678,Auwiesen,P
+-2,http://localhost/,sam,12345678,# Kaba TZM 2,P
+-2,http://localhost/,sam,12345678,# Kaba TZM 2,D
+diff --git a/tests/Icfm.Web.Integration.Test/TestSettings.csv b/tests/Icfm.Web.Integration.Test/TestSettings.csv
+deleted file mode 100644
+index 40802d3..0000000
+--- a/tests/Icfm.Web.Integration.Test/TestSettings.csv
++++ /dev/null
+@@ -1,2 +0,0 @@
+-﻿id,spitalMuriUrl,spitalMuriUsername,spitalMuriPassword,europaAlleeUrl,europaAlleeUsername,europaAlleePassword,camposUrl,camposUsername,camposPassword,pppburgdorfUrl,pppburgdorfUsername,pppburgdorfPassword,helpdeskUrl,helpdeskUsername,helpdeskPassword,auwiesenUrl,auwiesenUsernameCallcenter,auwiesenUsernameReport,auwiesenPassword,camposDirectUrl,camposDirectUsername,camposDirectPassword,ckwHelpdeskUrl,ckwHelpdeskUsername,ewzHelpdeskUrl,ewzHelpdeskUsername,auwiesenDirectUrl,camposMobileUrl,camposMobileUsername,camposMobilePassword
+-1,http://helpdesk.campos.dev/spitalmuri/,simone,12345678, http://helpdesk.campos.dev/europaallee/,sam,12345678,http://localhost/,sam,12345678,http://localhost/pppburgdorf/,sam,12345678,http://helpdesk.campos.dev/,sam,12345678,http://localhost/auwiesenhelpdesk,callcenter@auwiesen.ch,test.rieter@icfm.ch,12345678,https://www.campos.ch/login/,sam,12345678,https://ng2.campos.ch/ckwhelpdesk/Account/Login?hash=71A71b5ED5E2A0E88DB1C22D1C0F84C85DF2C5D264F51917D270B889078B2403F69A00dE158FEDED59D9&username=,marco.huwiler@ckw.ch,http://ng.campos.ch/ewz/Account/Login?hash=17C03957E58ED035C6647C965B66B5FBDF0850708E534866F46D733A7ACE870ECA2380E2E4F9BE57381D&username=,EWZCAPP@ewz.ch,http://localhost/auwiesenhelpdesk/Account/Login?Hash=796CC1B263C44393AB4DA446BE1D72C1,http://www.campos.ch/m/,apple,banana
+\ No newline at end of file
+-- 
+1.8.4.msysgit.0
+
